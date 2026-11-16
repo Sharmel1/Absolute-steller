@@ -1,31 +1,681 @@
 <!DOCTYPE html>
-<!-- A placeholder from the Home Sales template. Replace this file with your site's first page. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Under construction</title>
-  <!-- An empty icon, so the browser doesn't log an error looking for favicon.ico -->
+  <meta name="theme-color" content="#f5f6f2">
+  <meta name="description" content="Explore median home sale prices across 18 college towns, calculated from completed sales in the College-town home sales dataset.">
+  <title>College-town home prices | Home Sales, 2026</title>
   <link rel="icon" href="data:,">
   <style>
-    :root { color-scheme: light dark; }
-    body {
-      max-width: 40rem;
-      margin: 0 auto;
-      padding: 3rem 1rem;
-      font-family: system-ui, sans-serif;
-      line-height: 1.5;
+    :root {
+      color-scheme: light;
+      --ink: #172f32;
+      --muted: #627477;
+      --line: #dce5df;
+      --paper: #f5f6f2;
+      --white: #fff;
+      --green: #136b57;
+      --green-dark: #0e5145;
+      --mint: #e4f0e9;
+      --gold: #c99a45;
+      --shadow: 0 20px 55px rgb(23 47 50 / 8%);
     }
-    footer { margin-top: 3rem; font-size: 0.875rem; opacity: 0.75; }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1120px, calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      border-bottom: 1px solid rgb(23 47 50 / 9%);
+      background: rgb(245 246 242 / 92%);
+    }
+
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--green);
+      color: var(--white);
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    nav {
+      display: flex;
+      gap: 28px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    nav a { text-decoration: none; }
+    nav a:hover, nav a:focus-visible { color: var(--green); }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 76px 0 66px;
+      background: #e9f0e9;
+    }
+
+    .hero::after {
+      position: absolute;
+      right: max(-100px, calc((100vw - 1300px) / 2));
+      bottom: -240px;
+      width: 590px;
+      height: 590px;
+      border: 1px solid rgb(19 107 87 / 13%);
+      border-radius: 50%;
+      box-shadow: 0 0 0 48px rgb(19 107 87 / 3%), 0 0 0 96px rgb(19 107 87 / 3%);
+      content: "";
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 20px;
+      color: var(--green);
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 22px;
+      height: 2px;
+      background: var(--gold);
+      content: "";
+    }
+
+    h1, h2, p { margin-top: 0; }
+
+    h1 {
+      max-width: 760px;
+      margin-bottom: 18px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.6rem, 6vw, 4.65rem);
+      font-weight: 500;
+      letter-spacing: -0.055em;
+      line-height: 1.04;
+    }
+
+    .hero-copy {
+      max-width: 600px;
+      margin-bottom: 0;
+      color: #4e6565;
+      font-size: clamp(1rem, 2vw, 1.12rem);
+    }
+
+    .hero-copy strong { color: var(--ink); }
+
+    .content { padding: 54px 0 72px; }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin-bottom: 5px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      font-weight: 500;
+      letter-spacing: -0.035em;
+    }
+
+    .section-heading p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .result-count {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .table-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .search-wrap {
+      position: relative;
+      width: min(340px, 100%);
+    }
+
+    .search-wrap::before {
+      position: absolute;
+      top: 50%;
+      left: 13px;
+      color: #7d8d8c;
+      content: "⌕";
+      font-size: 1.2rem;
+      transform: translateY(-55%);
+    }
+
+    input, select {
+      min-height: 42px;
+      border: 1px solid #d5dfd9;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.88rem;
+    }
+
+    input { width: 100%; padding: 9px 12px 9px 38px; }
+    select { padding: 8px 34px 8px 12px; }
+    input:focus, select:focus { outline: 3px solid rgb(19 107 87 / 18%); border-color: var(--green); }
+
+    .sort-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    .table-scroll { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    caption {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    th {
+      padding: 13px 22px;
+      background: #f8faf8;
+      color: #748481;
+      font-size: 0.69rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 15px 22px;
+      border-top: 1px solid #edf1ed;
+      vertical-align: middle;
+    }
+
+    tbody tr:hover { background: #fbfcfa; }
+
+    .city-name { font-weight: 750; letter-spacing: -0.015em; }
+    .state-cell { color: var(--muted); font-size: 0.9rem; }
+
+    .price-cell {
+      width: 35%;
+      color: var(--green-dark);
+      font-size: 1.08rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .sales-cell {
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .bar-cell { width: 25%; }
+
+    .bar-track {
+      width: 100%;
+      height: 7px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #edf2ee;
+    }
+
+    .bar {
+      height: 100%;
+      min-width: 3px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #70a989, var(--green));
+    }
+
+    .empty-state, .load-state {
+      padding: 38px 22px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .load-state[hidden], .empty-state[hidden], tbody[hidden] { display: none; }
+
+    .method {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 28px;
+      margin-top: 34px;
+    }
+
+    .method-card, .source-card {
+      padding: 25px 27px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .method-card h2, .source-card h2 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .method-card p, .source-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .filter-pill {
+      display: inline-block;
+      margin: 0 2px;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: var(--mint);
+      color: var(--green-dark);
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .source-card a {
+      display: inline-block;
+      margin-top: 14px;
+      color: var(--green);
+      font-size: 0.87rem;
+      font-weight: 750;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    footer {
+      padding: 24px 0 32px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    footer p { margin-bottom: 0; }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 32px, 1120px); }
+      .topbar-inner { min-height: 66px; }
+      nav { gap: 16px; font-size: 0.78rem; }
+      .hero { padding: 58px 0 52px; }
+      .hero::after { right: -370px; }
+      .content { padding: 40px 0 52px; }
+      .section-heading { align-items: start; flex-direction: column; gap: 12px; }
+      .toolbar { align-items: stretch; flex-direction: column; padding: 15px; }
+      .search-wrap { width: 100%; }
+      .sort-wrap { justify-content: space-between; }
+      .sort-wrap select { flex: 1; max-width: 220px; }
+      th, td { padding-inline: 14px; }
+      .bar-cell { display: none; }
+      .method { grid-template-columns: 1fr; gap: 14px; margin-top: 20px; }
+      .method-card, .source-card { padding: 21px; }
+    }
+
+    @media (max-width: 390px) {
+      nav { gap: 10px; }
+      nav a { font-size: 0.72rem; }
+      .brand { gap: 8px; font-size: 0.82rem; }
+      .brand-mark { width: 30px; height: 30px; }
+      .price-cell { font-size: 0.96rem; }
+    }
   </style>
 </head>
 <body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#" aria-label="Home Sales, home">
+        <span class="brand-mark" aria-hidden="true">$</span>
+        <span>HOME SALES <span style="color: var(--muted); font-weight: 550;">/ 2026</span></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#cities">City prices</a>
+        <a href="#method">Method</a>
+        <a href="#source">Source</a>
+      </nav>
+    </div>
+  </header>
+
   <main>
-    <h1>This site is under construction</h1>
-    <p>It will show findings from the College-town home sales dataset.</p>
+    <section class="hero">
+      <div class="shell hero-content">
+        <p class="eyebrow">A data brief on college-town housing</p>
+        <h1>What does a home cost near campus?</h1>
+        <p class="hero-copy">
+          A city-by-city look at <strong>median sale prices</strong> across 18 college towns.
+          Compare local markets using completed home sales collected in March 2026.
+        </p>
+      </div>
+    </section>
+
+    <section class="content shell" id="cities" aria-labelledby="cities-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="cities-heading">Median sale price by city</h2>
+          <p>Each price represents the middle sale in that city after applying the filter below.</p>
+        </div>
+        <span class="result-count" id="result-count" aria-live="polite">Loading city results...</span>
+      </div>
+
+      <div class="table-card">
+        <div class="toolbar">
+          <label class="search-wrap">
+            <span class="visually-hidden" style="position:absolute;clip:rect(0,0,0,0);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;">Search by city or state</span>
+            <input id="city-search" type="search" placeholder="Search a city or state" autocomplete="off">
+          </label>
+          <label class="sort-wrap" for="sort-order">
+            <span>Sort by</span>
+            <select id="sort-order">
+              <option value="price-desc">Highest median price</option>
+              <option value="price-asc">Lowest median price</option>
+              <option value="name-asc">City name, A to Z</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <caption>Median home sale price and qualifying sale count for each city.</caption>
+            <thead>
+              <tr>
+                <th scope="col">City</th>
+                <th scope="col">State</th>
+                <th scope="col">Median sale price</th>
+                <th scope="col">Included sales</th>
+                <th class="bar-cell" scope="col"><span class="visually-hidden" style="position:absolute;clip:rect(0,0,0,0);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;">Price comparison</span></th>
+              </tr>
+            </thead>
+            <tbody id="city-rows" hidden></tbody>
+          </table>
+          <div class="load-state" id="load-state" role="status">Loading sale records...</div>
+          <div class="empty-state" id="empty-state" hidden>No cities match that search. Try another name or state.</div>
+        </div>
+      </div>
+
+      <div class="method" id="method">
+        <article class="method-card">
+          <h2>How to read these numbers</h2>
+          <p>
+            The median is the midpoint when qualifying sale prices are ordered from lowest to highest.
+            Sales under <span class="filter-pill">$10,000</span> are excluded because the dataset notes
+            that some very low prices are implausible. The rule is applied consistently to every city.
+            Prices are shown in whole dollars.
+          </p>
+        </article>
+        <article class="source-card" id="source">
+          <h2>About the data</h2>
+          <p>
+            Completed home sales from 18 college towns. Values are as reported by the collection source,
+            not independently verified against county records.
+          </p>
+          <a href="docs/data_description_sheet.md">Read the data description</a>
+        </article>
+      </div>
+    </section>
   </main>
+
   <footer>
-    <p>Data: College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026.</p>
+    <div class="shell">
+      <p>Source: College-town home sales dataset, version 1.0 (2026). University of Illinois-Deloitte Foundation Center for Business Emerging Technologies. Data collected March 2026.</p>
+    </div>
   </footer>
+
+  <script>
+    const currency = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0
+    });
+    const countFormat = new Intl.NumberFormat("en-US");
+    const rowsElement = document.getElementById("city-rows");
+    const searchElement = document.getElementById("city-search");
+    const sortElement = document.getElementById("sort-order");
+    const resultCount = document.getElementById("result-count");
+    const loadState = document.getElementById("load-state");
+    const emptyState = document.getElementById("empty-state");
+    let cities = [];
+
+    function parseCSV(text) {
+      const records = [];
+      let record = [];
+      let field = "";
+      let quoted = false;
+
+      for (let i = 0; i < text.length; i += 1) {
+        const character = text[i];
+        if (quoted) {
+          if (character === '"' && text[i + 1] === '"') {
+            field += '"';
+            i += 1;
+          } else if (character === '"') {
+            quoted = false;
+          } else {
+            field += character;
+          }
+        } else if (character === '"' && field.length === 0) {
+          quoted = true;
+        } else if (character === ",") {
+          record.push(field);
+          field = "";
+        } else if (character === "\n" || character === "\r") {
+          if (character === "\r" && text[i + 1] === "\n") i += 1;
+          record.push(field);
+          if (record.some((value) => value !== "")) records.push(record);
+          record = [];
+          field = "";
+        } else {
+          field += character;
+        }
+      }
+
+      if (field !== "" || record.length > 0) {
+        record.push(field);
+        if (record.some((value) => value !== "")) records.push(record);
+      }
+      return records;
+    }
+
+    function median(values) {
+      const middle = Math.floor(values.length / 2);
+      if (values.length % 2 === 1) return values[middle];
+      return Math.round((values[middle - 1] + values[middle]) / 2);
+    }
+
+    function getSortedCities() {
+      const query = searchElement.value.trim().toLocaleLowerCase();
+      const filtered = cities.filter((city) =>
+        `${city.city} ${city.state}`.toLocaleLowerCase().includes(query)
+      );
+      const sortOrder = sortElement.value;
+
+      filtered.sort((a, b) => {
+        if (sortOrder === "price-asc") return a.median - b.median || a.city.localeCompare(b.city);
+        if (sortOrder === "name-asc") return a.city.localeCompare(b.city) || a.state.localeCompare(b.state);
+        return b.median - a.median || a.city.localeCompare(b.city);
+      });
+      return filtered;
+    }
+
+    function render() {
+      const visibleCities = getSortedCities();
+      const highestMedian = Math.max(...cities.map((city) => city.median));
+      rowsElement.replaceChildren();
+
+      for (const city of visibleCities) {
+        const row = document.createElement("tr");
+        const cityCell = document.createElement("td");
+        const stateCell = document.createElement("td");
+        const priceCell = document.createElement("td");
+        const salesCell = document.createElement("td");
+        const barCell = document.createElement("td");
+        const barTrack = document.createElement("div");
+        const bar = document.createElement("div");
+
+        cityCell.className = "city-name";
+        cityCell.textContent = city.city;
+        stateCell.className = "state-cell";
+        stateCell.textContent = city.state;
+        priceCell.className = "price-cell";
+        priceCell.textContent = currency.format(city.median);
+        salesCell.className = "sales-cell";
+        salesCell.textContent = countFormat.format(city.sales);
+        barCell.className = "bar-cell";
+        barTrack.className = "bar-track";
+        barTrack.setAttribute("aria-hidden", "true");
+        bar.className = "bar";
+        bar.style.width = `${(city.median / highestMedian) * 100}%`;
+        barTrack.append(bar);
+        barCell.append(barTrack);
+        row.append(cityCell, stateCell, priceCell, salesCell, barCell);
+        rowsElement.append(row);
+      }
+
+      rowsElement.hidden = visibleCities.length === 0;
+      emptyState.hidden = visibleCities.length !== 0;
+      resultCount.textContent = `${visibleCities.length} ${visibleCities.length === 1 ? "city" : "cities"}`;
+    }
+
+    async function loadData() {
+      try {
+        const response = await fetch("data/college_town_home_sales.csv");
+        if (!response.ok) throw new Error(`CSV request failed with status ${response.status}`);
+        const records = parseCSV(await response.text());
+        const headers = records.shift();
+        const cityIndex = headers.indexOf("city");
+        const stateIndex = headers.indexOf("state");
+        const priceIndex = headers.indexOf("sale_price");
+        if (cityIndex < 0 || stateIndex < 0 || priceIndex < 0) {
+          throw new Error("The CSV is missing a required city, state, or sale_price column.");
+        }
+
+        const grouped = new Map();
+        let includedSales = 0;
+        let excludedSales = 0;
+        for (const record of records) {
+          const priceText = record[priceIndex];
+          const price = Number(priceText);
+          const city = record[cityIndex];
+          const state = record[stateIndex];
+          if (!Number.isFinite(price) || !city || !state) continue;
+          if (price < 10000) {
+            excludedSales += 1;
+            continue;
+          }
+          const key = `${city}\u0000${state}`;
+          if (!grouped.has(key)) grouped.set(key, { city, state, prices: [] });
+          grouped.get(key).prices.push(price);
+          includedSales += 1;
+        }
+
+        cities = Array.from(grouped.values(), (group) => {
+          group.prices.sort((a, b) => a - b);
+          return {
+            city: group.city,
+            state: group.state,
+            median: median(group.prices),
+            sales: group.prices.length
+          };
+        });
+
+        render();
+        loadState.hidden = true;
+        resultCount.textContent = `${cities.length} cities · ${countFormat.format(includedSales)} sales included`;
+        document.querySelector(".method-card p").setAttribute(
+          "aria-label",
+          `Median calculated from ${countFormat.format(includedSales)} sales. ${countFormat.format(excludedSales)} sales under $10,000 were excluded.`
+        );
+      } catch (error) {
+        console.error("Could not load home sale data:", error);
+        loadState.textContent = "Sale data could not be loaded. Please try again later.";
+        loadState.setAttribute("role", "alert");
+        resultCount.textContent = "Results unavailable";
+      }
+    }
+
+    searchElement.addEventListener("input", render);
+    sortElement.addEventListener("change", render);
+    loadData();
+  </script>
 </body>
 </html>
