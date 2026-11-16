@@ -1,6 +1,6 @@
-# [ https://sharmel1.github.io/Absolute-steller/]
+# [ Title ]
 
-## Start here (delete this section before you submit)
+## (https://sharmel1.github.io/Absolute-steller/)
 
 This repository is your starting point for the Home Sales case. It already holds the dataset, its description sheet, project instructions for your AI coding agent, and outlines of the README and agent log that the case asks for.
 
