@@ -1,4 +1,4 @@
-# [ Title ]
+# What does a home cost near campus?
 
 ## (https://sharmel1.github.io/Absolute-steller/)
 
